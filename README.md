@@ -38,19 +38,6 @@ Built for **Milestone 3: React – Modern UI Development**.
 
 ---
 
-## Tech stack
-
-| Tool | Used for |
-|---|---|
-| [React 19](https://react.dev) | Building the user interface with components |
-| [Vite](https://vite.dev) | Development server and production build |
-| [React Router 7](https://reactrouter.com) | Moving between pages without reloading |
-| [Tailwind CSS 4](https://tailwindcss.com) | Styling and responsive layout |
-| localStorage | Saving expenses in the browser (no backend) |
-| Google Fonts | The "Dancing Script" font for the app name |
-
----
-
 ## Project structure
 
 ```
