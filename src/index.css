@@ -5,3 +5,52 @@
 @theme {
   --font-brand: "Dancing Script", cursive;
 }
+
+/* ---------- 404 page animation: coins falling out of the pouch ---------- */
+
+/* The pouch rocks gently from side to side */
+@keyframes pouch-sway {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+
+/* A coin appears under the pouch, spins as it falls, then fades out */
+@keyframes coin-fall {
+  0%   { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 0; }
+  12%  { opacity: 1; }
+  80%  { transform: translate(var(--drift), 120px) scale(1) rotate(320deg); opacity: 1; }
+  100% { transform: translate(var(--drift), 132px) scale(1) rotate(360deg); opacity: 0; }
+}
+
+.pouch-sway {
+  animation: pouch-sway 2.4s ease-in-out infinite;
+  transform-origin: 50% 10%;
+}
+
+.coin-fall {
+  animation: coin-fall 1.8s ease-in infinite;
+  opacity: 0;
+}
+
+/* A gold ₹ coin */
+.coin {
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: bold 14px Georgia, serif;
+  color: #7A4A10;
+  background: radial-gradient(circle at 35% 30%, #FFF1B8, #F2C14E 55%, #C8901E);
+  border: 2px solid #B07A18;
+  box-shadow: 0 2px 3px rgba(74, 44, 26, 0.3);
+}
+
+/* Respect people who turn off animations in their device settings */
+@media (prefers-reduced-motion: reduce) {
+  .pouch-sway,
+  .coin-fall {
+    animation: none;
+  }
+}

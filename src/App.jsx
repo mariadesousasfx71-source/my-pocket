@@ -4,6 +4,8 @@ import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Expenses from "./pages/Expenses";
 import AddExpense from "./pages/AddExpense";
+import EditExpense from "./pages/EditExpense";
+import NotFound from "./pages/NotFound";
 
 function App() {
   // Load saved expenses once, when the app starts
@@ -21,6 +23,10 @@ function App() {
     setExpenses([...expenses, { id: Date.now(), ...expense }]);
   }
 
+  function updateExpense(id, changes) {
+    setExpenses(expenses.map((e) => (e.id === id ? { ...e, ...changes } : e)));
+  }
+
   function deleteExpense(id) {
     setExpenses(expenses.filter((e) => e.id !== id));
   }
@@ -36,6 +42,11 @@ function App() {
             element={<Expenses expenses={expenses} onDelete={deleteExpense} />}
           />
           <Route path="/add" element={<AddExpense onAdd={addExpense} />} />
+          <Route
+            path="/edit/:id"
+            element={<EditExpense expenses={expenses} onUpdate={updateExpense} />}
+          />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
     </div>
