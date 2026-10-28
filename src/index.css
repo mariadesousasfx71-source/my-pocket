@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Elegant script font for the "My Pocket" name.
+   Use it with the class "font-brand". */
+@theme {
+  --font-brand: "Dancing Script", cursive;
+}
