@@ -18,3 +18,17 @@ export function toIsoDate(text) {
 
   return iso;
 }
+
+// Today's year and month, e.g. "2026-10"
+export function currentMonth() {
+  return new Date().toLocaleDateString("en-CA").slice(0, 7);
+}
+
+// "2026-10" → "October 2026"
+export function monthLabel(yearMonth) {
+  const [year, month] = yearMonth.split("-");
+  return new Date(Number(year), Number(month) - 1, 1).toLocaleDateString("en-IN", {
+    month: "long",
+    year: "numeric",
+  });
+}
