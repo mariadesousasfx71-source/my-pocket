@@ -129,4 +129,4 @@ _Add screenshots here, for example:_
 
 ## Author
 
-**Maria de Sousa**, web development student at WsCube Tech.
+**Maria de Sousa**, Full Stack Development student at WsCube Tech.
