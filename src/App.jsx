@@ -1,51 +1,29 @@
-import { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
-import Expenses from "./pages/Expenses";
-import AddExpense from "./pages/AddExpense";
-import EditExpense from "./pages/EditExpense";
+import Transactions from "./pages/Transactions";
+import AddTransaction from "./pages/AddTransaction";
+import EditTransaction from "./pages/EditTransaction";
+import Reports from "./pages/Reports";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
+// The shared layout: the Navbar is drawn once, and only the page
+// inside <main> changes as you move between addresses.
 function App() {
-  // Load saved expenses once, when the app starts
-  const [expenses, setExpenses] = useState(() => {
-    const saved = localStorage.getItem("expenses");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  // Save to localStorage every time the list changes
-  useEffect(() => {
-    localStorage.setItem("expenses", JSON.stringify(expenses));
-  }, [expenses]);
-
-  function addExpense(expense) {
-    setExpenses([...expenses, { id: Date.now(), ...expense }]);
-  }
-
-  function updateExpense(id, changes) {
-    setExpenses(expenses.map((e) => (e.id === id ? { ...e, ...changes } : e)));
-  }
-
-  function deleteExpense(id) {
-    setExpenses(expenses.filter((e) => e.id !== id));
-  }
-
   return (
-    <div className="min-h-screen bg-[#F6EADB] bg-[url('/doodle.svg')] bg-repeat">
+    <div className="min-h-screen bg-[#E6D2B3] bg-[url('/doodle.svg')] bg-repeat">
       <Navbar />
       <main className="px-4 py-6 sm:p-8">
         <Routes>
-          <Route path="/" element={<Dashboard expenses={expenses} />} />
-          <Route
-            path="/expenses"
-            element={<Expenses expenses={expenses} onDelete={deleteExpense} />}
-          />
-          <Route path="/add" element={<AddExpense onAdd={addExpense} />} />
-          <Route
-            path="/edit/:id"
-            element={<EditExpense expenses={expenses} onUpdate={updateExpense} />}
-          />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/add" element={<AddTransaction />} />
+          <Route path="/edit/:id" element={<EditTransaction />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
+          {/* old address from before the rename */}
+          <Route path="/expenses" element={<Navigate to="/transactions" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
@@ -53,4 +31,4 @@ function App() {
   );
 }
 
-export default App;
+export default App;

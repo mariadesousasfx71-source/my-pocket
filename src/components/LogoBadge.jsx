@@ -5,7 +5,7 @@ import Logo from "./Logo";
 function LogoBadge({ size = 64 }) {
   return (
     <div
-      className="flex items-center justify-center rounded-full bg-[#F5E1C3] ring-4 ring-[#C8955F] shadow-md shrink-0"
+      className="flex items-center justify-center rounded-full bg-[#F5E1C3] ring-4 ring-[#C9A227] shadow-md shrink-0"
       style={{ width: size, height: size }}
     >
       <Logo size={size * 0.8} />
