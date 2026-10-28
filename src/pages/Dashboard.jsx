@@ -1,123 +1,122 @@
 import { Link } from "react-router-dom";
-import { formatMoney } from "../utils/formatMoney";
-import { formatDate } from "../utils/formatDate";
+import Card from "../components/Card";
 import LogoBadge from "../components/LogoBadge";
+import StatBox from "../components/StatBox";
+import ProgressBar from "../components/ProgressBar";
+import BudgetAlert from "../components/BudgetAlert";
+import TransactionRow from "../components/TransactionRow";
+import useTransactions from "../hooks/useTransactions";
+import { formatMoney } from "../utils/formatMoney";
+import { currentMonth } from "../utils/formatDate";
+import { buttonStyle } from "../utils/styles";
 
-function Dashboard({ expenses }) {
-  // "2026-10" — the year and month of today, to find this month's expenses
-  const thisMonth = new Date().toLocaleDateString("en-CA").slice(0, 7);
+// Adds up the amounts of one type ("income" or "expense") in a list
+function totalOf(list, type) {
+  return list.filter((t) => t.type === type).reduce((sum, t) => sum + t.amount, 0);
+}
 
-  // 1. Totals
-  const total = expenses.reduce((sum, e) => sum + e.amount, 0);
-  const monthExpenses = expenses.filter((e) => e.date.startsWith(thisMonth));
-  const monthTotal = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
+function Dashboard() {
+  const { transactions, budget } = useTransactions();
 
-  // 2. Total per category, e.g. { Food: 1650, Bills: 799 }
-  const byCategory = expenses.reduce((totals, e) => {
-    totals[e.category] = (totals[e.category] || 0) + e.amount;
-    return totals;
-  }, {});
-
-  // Turn it into a list, biggest first: [["Food", 1650], ["Bills", 799]]
-  const categoryList = Object.entries(byCategory).toSorted((a, b) => b[1] - a[1]);
-  const biggest = categoryList.length > 0 ? categoryList[0][1] : 0;
-
-  // 3. The five most recent expenses
-  const recent = expenses
-    .toSorted((a, b) => b.date.localeCompare(a.date))
-    .slice(0, 5);
-
-  if (expenses.length === 0) {
+  if (transactions.length === 0) {
     return (
       <div className="flex flex-col items-center text-center mt-12 space-y-4">
         <LogoBadge size={160} />
-        <h2 className="text-3xl font-bold text-[#4A2C1A]">
+        <h2 className="text-3xl font-bold text-[#3B2416]">
           Welcome to <span className="font-brand text-5xl">My Pocket</span>
         </h2>
-        <p className="text-stone-600">Add your first expense to see your summary here.</p>
-        <Link
-          to="/add"
-          className="inline-block bg-[#4A2C1A] hover:bg-[#3A2214] text-amber-50 border border-[#2E1A0E] shadow-md hover:shadow-lg transition rounded-lg px-4 py-2"
-        >
-          Add an expense
+        <p className="text-[#3B2416] font-medium">
+          Add your first transaction to see your summary here.
+        </p>
+        <Link to="/add" className={buttonStyle}>
+          Add a transaction
         </Link>
       </div>
     );
   }
 
+  // 1. Balance: all income minus all expenses
+  const balance = totalOf(transactions, "income") - totalOf(transactions, "expense");
+
+  // 2. This month's income and expenses
+  const thisMonth = transactions.filter((t) => t.date.startsWith(currentMonth()));
+  const monthIncome = totalOf(thisMonth, "income");
+  const monthExpense = totalOf(thisMonth, "expense");
+
+  // 3. Budget used this month, as a percentage
+  const budgetUsed = budget > 0 ? Math.round((monthExpense / budget) * 100) : 0;
+  const barColour =
+    budgetUsed >= 100 ? "bg-red-600" : budgetUsed >= 80 ? "bg-amber-500" : "bg-[#9A5A2C]";
+
+  // 4. The five most recent transactions
+  const recent = transactions
+    .toSorted((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 5);
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Welcome banner with the logo */}
-      <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-6 bg-[#F3E3CC] border border-[#D9B98F] rounded-xl shadow-md p-6">
+      <Card className="p-6 flex flex-col sm:flex-row items-center text-center sm:text-left gap-6">
         <LogoBadge size={120} />
         <div>
-          <h2 className="font-brand text-5xl text-[#4A2C1A]">My Pocket</h2>
-          <p className="mt-1 text-lg sm:text-xl font-semibold text-[#7A4318] tracking-wide">
+          <h2 className="font-brand text-5xl text-[#3B2416]">My Pocket</h2>
+          <p className="mt-1 text-lg sm:text-xl font-semibold text-[#9A5A2C] tracking-wide">
             Every rupee, in one place.
           </p>
         </div>
-      </div>
+      </Card>
+
+      <BudgetAlert spent={monthExpense} budget={budget} />
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center sm:text-left">
-        <div className="bg-[#F3E3CC] border border-[#D9B98F] rounded-xl shadow-md p-5">
-          <p className="text-sm text-stone-500">This month</p>
-          <p className="text-2xl font-bold text-[#4A2C1A]">{formatMoney(monthTotal)}</p>
-        </div>
-        <div className="bg-[#F3E3CC] border border-[#D9B98F] rounded-xl shadow-md p-5">
-          <p className="text-sm text-stone-500">All time</p>
-          <p className="text-2xl font-bold text-stone-800">{formatMoney(total)}</p>
-        </div>
-        <div className="bg-[#F3E3CC] border border-[#D9B98F] rounded-xl shadow-md p-5">
-          <p className="text-sm text-stone-500">Expenses recorded</p>
-          <p className="text-2xl font-bold text-stone-800">{expenses.length}</p>
-        </div>
+        <StatBox
+          label="Balance"
+          value={(balance < 0 ? "−" : "") + formatMoney(Math.abs(balance))}
+          tone={balance < 0 ? "expense" : "default"}
+        />
+        <StatBox label="Income this month" value={formatMoney(monthIncome)} tone="income" />
+        <StatBox label="Expenses this month" value={formatMoney(monthExpense)} tone="expense" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Spending by category */}
-        <div className="bg-[#F3E3CC] border border-[#D9B98F] rounded-xl shadow-md p-5">
-          <h3 className="font-semibold mb-4 text-center sm:text-left">Spending by category</h3>
-          <ul className="space-y-3">
-            {categoryList.map(([category, amount]) => (
-              <li key={category}>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>{category}</span>
-                  <span className="font-medium">{formatMoney(amount)}</span>
-                </div>
-                <div className="h-2 bg-[#E2C49C] rounded-full">
-                  <div
-                    className="h-2 bg-[#7A4318] rounded-full"
-                    style={{ width: `${(amount / biggest) * 100}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {/* Monthly budget */}
+        <Card className="p-5 space-y-3">
+          <h3 className="font-semibold">Monthly budget</h3>
+          {budget > 0 ? (
+            <>
+              <p className="text-sm text-stone-600">
+                {formatMoney(monthExpense)} spent of {formatMoney(budget)}
+              </p>
+              <ProgressBar percent={budgetUsed} colour={barColour} />
+              <p className="text-sm font-medium text-[#3B2416]">{budgetUsed}% used</p>
+            </>
+          ) : (
+            <p className="text-sm text-stone-600">
+              No budget set yet.{" "}
+              <Link to="/settings" className="text-[#9A5A2C] font-medium hover:underline">
+                Set one in Settings
+              </Link>
+            </p>
+          )}
+        </Card>
 
-        {/* Recent expenses */}
-        <div className="bg-[#F3E3CC] border border-[#D9B98F] rounded-xl shadow-md p-5">
-          <div className="flex justify-between items-baseline mb-4">
-            <h3 className="font-semibold">Recent expenses</h3>
-            <Link to="/expenses" className="text-sm text-[#7A4318] font-medium hover:underline">
+        {/* Recent transactions */}
+        <Card className="p-5">
+          <div className="flex justify-between items-baseline mb-3">
+            <h3 className="font-semibold">Recent transactions</h3>
+            <Link to="/transactions" className="text-sm text-[#9A5A2C] font-medium hover:underline">
               See all
             </Link>
           </div>
-          <ul className="divide-y divide-[#D9B98F]">
-            {recent.map((e) => (
-              <li key={e.id} className="flex justify-between py-2">
-                <div>
-                  <p className="font-medium">{e.title}</p>
-                  <p className="text-xs text-stone-500">
-                    {e.category} · {formatDate(e.date)}
-                  </p>
-                </div>
-                <span className="font-semibold">{formatMoney(e.amount)}</span>
+          <ul className="divide-y divide-[#E2C49C]">
+            {recent.map((t) => (
+              <li key={t.id} className="py-2">
+                <TransactionRow transaction={t} />
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
       </div>
     </div>
   );
