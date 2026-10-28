@@ -3,7 +3,7 @@
 function Card({ children, className = "" }) {
   return (
     <div
-      className={`bg-[#FCF6EE] border border-[#D9B98F] border-l-[6px] border-l-[#3B2416] rounded-xl shadow-md ${className}`}
+      className={`bg-[#F3E6D3] border border-[#CFA97A] border-l-[6px] border-l-[#3B2416] rounded-xl shadow-md ${className}`}
     >
       {children}
     </div>
