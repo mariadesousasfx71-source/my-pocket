@@ -2,7 +2,9 @@ import { formatMoney } from "../utils/formatMoney";
 
 // Warns when this month's spending reaches 80% of the budget (or goes over).
 // Shows nothing if there's no budget or spending is still under 80%.
-function BudgetAlert({ spent, budget }) {
+// preview: true is used on the Add/Edit form, where the expense is not saved
+// yet, so the wording says what WILL happen.
+function BudgetAlert({ spent, budget, preview = false }) {
   if (!budget) return null;
 
   const percent = Math.round((spent / budget) * 100);
@@ -20,10 +22,17 @@ function BudgetAlert({ spent, budget }) {
       }`}
     >
       <p className="font-semibold">
-        {isOver ? "You've gone over this month's budget!" : "Careful, you're close to your budget."}
+        {preview
+          ? isOver
+            ? "This expense will put you over this month's budget!"
+            : "This expense will take you close to your budget."
+          : isOver
+            ? "You've gone over this month's budget!"
+            : "Careful, you're close to your budget."}
       </p>
       <p className="text-sm mt-1">
-        You've spent {formatMoney(spent)} of your {formatMoney(budget)} budget ({percent}%).
+        {preview ? "You'll have spent" : "You've spent"} {formatMoney(spent)} of your{" "}
+        {formatMoney(budget)} budget ({percent}%).
       </p>
     </div>
   );

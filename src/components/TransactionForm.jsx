@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import Card from "./Card";
-import { formatDate, toIsoDate } from "../utils/formatDate";
+import BudgetAlert from "./BudgetAlert";
+import { formatDate, toIsoDate, currentMonth } from "../utils/formatDate";
 import { titleOptions, categoriesFor } from "../utils/categories";
 import { inputStyle } from "../utils/styles";
 
@@ -9,7 +10,16 @@ import { inputStyle } from "../utils/styles";
 // - heading:     the title shown at the top of the form
 // - buttonLabel: the text on the submit button
 // - onSubmit:    what to do with the checked data
-function TransactionForm({ initial, heading, buttonLabel, onSubmit }) {
+// - budget:      the monthly budget (0 if none), so the form can warn you
+// - spentSoFar:  this month's expenses, not counting the one on this form
+function TransactionForm({
+  initial,
+  heading,
+  buttonLabel,
+  onSubmit,
+  budget = 0,
+  spentSoFar = 0,
+}) {
   const today = new Date().toLocaleDateString("en-CA");
   const startType = initial ? initial.type : "expense";
 
@@ -31,6 +41,12 @@ function TransactionForm({ initial, heading, buttonLabel, onSubmit }) {
   const [customTitle, setCustomTitle] = useState(
     initial ? !suggestions.includes(initial.title) : false
   );
+
+  // Budget warning: only for an expense dated this month. Adds the amount
+  // being typed to what is already spent, so you see the effect before saving.
+  const typedAmount = Number(amount) > 0 ? Number(amount) : 0;
+  const countsThisMonth = type === "expense" && (toIsoDate(date) || "").startsWith(currentMonth());
+  const spentAfter = spentSoFar + (countsThisMonth ? typedAmount : 0);
 
   function handleTypeChange(newType) {
     setType(newType);
@@ -220,6 +236,9 @@ function TransactionForm({ initial, heading, buttonLabel, onSubmit }) {
             className={`mt-1 ${inputStyle} resize-none`}
           />
         </label>
+
+        {/* Warns at 80% of the monthly budget, before you save */}
+        <BudgetAlert spent={spentAfter} budget={budget} preview />
 
         <button
           type="submit"
