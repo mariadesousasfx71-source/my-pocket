@@ -39,6 +39,10 @@ function Dashboard() {
   // 1. Balance: all income minus all expenses
   const balance = totalOf(transactions, "income") - totalOf(transactions, "expense");
 
+  // Zero balance: income and expenses cancel out exactly.
+  // (Math.abs(...) < 0.005 avoids tiny rounding errors with paise.)
+  const isZeroBalance = Math.abs(balance) < 0.005;
+
   // 2. This month's income and expenses
   const thisMonth = transactions.filter((t) => t.date.startsWith(currentMonth()));
   const monthIncome = totalOf(thisMonth, "income");
@@ -68,6 +72,18 @@ function Dashboard() {
       </Card>
 
       <BudgetAlert spent={monthExpense} budget={budget} />
+
+      {isZeroBalance && (
+        <div
+          role="alert"
+          className="rounded-xl border border-l-[6px] border-amber-300 border-l-amber-600 bg-amber-50 px-5 py-4 text-amber-900 shadow-md"
+        >
+          <p className="font-semibold">Zero Balance</p>
+          <p className="text-sm mt-1">
+            Your income and expenses are equal, so you have {formatMoney(0)} left.
+          </p>
+        </div>
+      )}
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center sm:text-left">

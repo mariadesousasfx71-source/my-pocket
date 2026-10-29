@@ -1,6 +1,12 @@
+<div align="center">
+
+<img src="public/favicon.svg" alt="My Pocket logo" width="130">
+
 # My Pocket
 
 **Every rupee, in one place.**
+
+</div>
 
 My Pocket is a personal finance app built with React. Record your income and expenses, sort them into categories, search and filter them, see reports by category, set a monthly budget with a warning when you get close, and check your balance in US dollars and euros at today's rates. Everything is saved in your browser, so your data is still there when you come back. Each person who logs in sees only their own records.
 
