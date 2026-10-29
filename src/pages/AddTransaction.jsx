@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import TransactionForm from "../components/TransactionForm";
 import useTransactions from "../hooks/useTransactions";
-import { spentThisMonth } from "../utils/budget";
+import { spentThisMonth, availableBalance } from "../utils/budget";
 
 function AddTransaction() {
   const { transactions, addTransaction, budget } = useTransactions();
@@ -19,6 +19,7 @@ function AddTransaction() {
       onSubmit={handleSave}
       budget={budget}
       spentSoFar={spentThisMonth(transactions)}
+      available={availableBalance(transactions)}
     />
   );
 }

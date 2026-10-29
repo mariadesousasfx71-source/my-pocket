@@ -1,9 +1,11 @@
 import { useState, useRef } from "react";
 import Card from "./Card";
+import Modal from "./Modal";
 import BudgetAlert from "./BudgetAlert";
 import { formatDate, toIsoDate, currentMonth } from "../utils/formatDate";
 import { titleOptions, categoriesFor } from "../utils/categories";
 import { inputStyle } from "../utils/styles";
+import { formatMoney } from "../utils/formatMoney";
 
 // One form used by both the Add and Edit pages.
 // - initial:     an existing transaction to start from (Edit), or nothing (Add)
@@ -12,6 +14,8 @@ import { inputStyle } from "../utils/styles";
 // - onSubmit:    what to do with the checked data
 // - budget:      the monthly budget (0 if none), so the form can warn you
 // - spentSoFar:  this month's expenses, not counting the one on this form
+// - available:   money you have now (income minus expenses). An expense bigger
+//                than this is refused with a pop-up.
 function TransactionForm({
   initial,
   heading,
@@ -19,6 +23,7 @@ function TransactionForm({
   onSubmit,
   budget = 0,
   spentSoFar = 0,
+  available = Infinity,
 }) {
   const today = new Date().toLocaleDateString("en-CA");
   const startType = initial ? initial.type : "expense";
@@ -32,6 +37,7 @@ function TransactionForm({
   const [date, setDate] = useState(formatDate(initial ? initial.date : today));
   const [note, setNote] = useState(initial ? initial.note || "" : "");
   const [error, setError] = useState("");
+  const [noBalanceMessage, setNoBalanceMessage] = useState(""); // pop-up text, "" = hidden
   const calendarRef = useRef(null); // the hidden calendar input
 
   // Suggested titles for the chosen type and category
@@ -83,6 +89,15 @@ function TransactionForm({
     }
     if (!isoDate) {
       setError("Please enter a valid date as DD-MM-YYYY.");
+      return;
+    }
+    // You can't spend money you don't have: show a pop-up and don't save
+    if (type === "expense" && value > available) {
+      setNoBalanceMessage(
+        available > 0
+          ? `You only have ${formatMoney(available)} available, but this expense is ${formatMoney(value)}.`
+          : "You don't have any money available. Add some income first."
+      );
       return;
     }
 
@@ -247,6 +262,17 @@ function TransactionForm({
           {buttonLabel}
         </button>
       </form>
+      {noBalanceMessage && (
+        <Modal
+          title="You don't have enough balance"
+          confirmLabel="OK"
+          hideCancel
+          onConfirm={() => setNoBalanceMessage("")}
+          onCancel={() => setNoBalanceMessage("")}
+        >
+          <p>{noBalanceMessage}</p>
+        </Modal>
+      )}
     </Card>
   );
 }

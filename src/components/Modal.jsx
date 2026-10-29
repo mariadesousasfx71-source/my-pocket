@@ -5,8 +5,9 @@ import { useEffect } from "react";
 // - confirmLabel:    text on the red button (e.g. "Delete")
 // - onConfirm:       runs when the red button is clicked
 // - onCancel:        runs on Cancel, on Esc, or when the dark background is clicked
+// - hideCancel:      true for a simple message with one OK button
 // The parent decides when to show it: it simply doesn't render <Modal> otherwise.
-function Modal({ title, children, confirmLabel = "Confirm", onConfirm, onCancel }) {
+function Modal({ title, children, confirmLabel = "Confirm", onConfirm, onCancel, hideCancel = false }) {
   // Close with the Esc key. The listener is removed when the pop-up goes away
   // (the cleanup function), and re-added only if onCancel changes.
   useEffect(() => {
@@ -37,15 +38,18 @@ function Modal({ title, children, confirmLabel = "Confirm", onConfirm, onCancel 
         <div className="mt-2 text-stone-700">{children}</div>
 
         <div className="mt-5 flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            autoFocus
-            className="rounded-lg border border-[#CFA97A] px-4 py-2 font-medium text-[#3B2416] hover:bg-[#EAD9BF]"
-          >
-            Cancel
-          </button>
+          {!hideCancel && (
+            <button
+              onClick={onCancel}
+              autoFocus
+              className="rounded-lg border border-[#CFA97A] px-4 py-2 font-medium text-[#3B2416] hover:bg-[#EAD9BF]"
+            >
+              Cancel
+            </button>
+          )}
           <button
             onClick={onConfirm}
+            autoFocus={hideCancel}
             className="rounded-lg bg-red-700 px-4 py-2 font-semibold text-white shadow hover:bg-red-800"
           >
             {confirmLabel}

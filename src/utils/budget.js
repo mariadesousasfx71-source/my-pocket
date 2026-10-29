@@ -10,3 +10,12 @@ export function spentThisMonth(transactions, skipId) {
     )
     .reduce((sum, t) => sum + t.amount, 0);
 }
+
+// The money you have right now: all income minus all expenses.
+// skipId leaves out the transaction being edited, because its new amount is
+// checked separately.
+export function availableBalance(transactions, skipId) {
+  return transactions
+    .filter((t) => t.id !== skipId)
+    .reduce((sum, t) => sum + (t.type === "income" ? t.amount : -t.amount), 0);
+}

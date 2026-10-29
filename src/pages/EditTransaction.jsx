@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import TransactionForm from "../components/TransactionForm";
 import EmptyState from "../components/EmptyState";
 import useTransactions from "../hooks/useTransactions";
-import { spentThisMonth } from "../utils/budget";
+import { spentThisMonth, availableBalance } from "../utils/budget";
 
 function EditTransaction() {
   const { transactions, updateTransaction, budget } = useTransactions();
@@ -35,6 +35,7 @@ function EditTransaction() {
       onSubmit={handleSave}
       budget={budget}
       spentSoFar={spentThisMonth(transactions, transaction.id)}
+      available={availableBalance(transactions, transaction.id)}
     />
   );
 }
