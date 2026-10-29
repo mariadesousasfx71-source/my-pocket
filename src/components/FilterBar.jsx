@@ -10,7 +10,7 @@ function FilterBar({
   filters,
   onChange,
   onClear,
-  categoryOptions,
+  categoryGroups,
   titleOptions,
   monthOptions,
 }) {
@@ -89,7 +89,7 @@ function FilterBar({
             list="search-titles"
             value={filters.search}
             onChange={(e) => onChange("search", e.target.value)}
-            placeholder="Search or pick a title"
+            placeholder="Search by title or note"
             className={inputStyle}
           />
           <datalist id="search-titles">
@@ -106,10 +106,15 @@ function FilterBar({
               aria-label="Filter by category"
             >
               <option value="All">All categories</option>
-              {categoryOptions.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
+              {/* One heading per group: Expenses, Income */}
+              {categoryGroups.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.items.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
 
