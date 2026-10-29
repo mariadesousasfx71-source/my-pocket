@@ -1,22 +1,31 @@
 import TransactionsContext from "./TransactionsContext";
 import useLocalStorage from "../hooks/useLocalStorage";
+import useAuth from "../hooks/useAuth";
 
-// Before income was added, the app saved a list called "expenses" with no
-// type or note. This turns those old expenses into the new format, so no
-// data is lost. It only runs if there are no saved "transactions" yet.
-function loadOldExpenses() {
-  try {
-    const old = JSON.parse(localStorage.getItem("expenses")) || [];
-    return old.map((e) => ({ ...e, type: "expense", note: e.note || "" }));
-  } catch {
-    return [];
-  }
+// Wraps the whole app, so every page can use the same data.
+//
+// Each person has their own data. It is saved under a key that includes the
+// person's name, e.g. "transactions:maria" and "budget:maria", so someone who
+// logs in as "Rahul" never sees Maria's records.
+function TransactionsProvider({ children }) {
+  const { user } = useAuth();
+
+  // "Maria " and "maria" count as the same person
+  const userId = user ? user.name.trim().toLowerCase() : "guest";
+
+  // key={userId} makes React start fresh when a different person logs in,
+  // so it reads that person's saved data instead of keeping the last person's.
+  return (
+    <UserData key={userId} userId={userId}>
+      {children}
+    </UserData>
+  );
 }
 
-// Wraps the whole app, so every page can use the same data
-function TransactionsProvider({ children }) {
-  const [transactions, setTransactions] = useLocalStorage("transactions", loadOldExpenses);
-  const [budget, setBudget] = useLocalStorage("budget", 0);
+// Holds the transactions and budget of ONE person
+function UserData({ userId, children }) {
+  const [transactions, setTransactions] = useLocalStorage(`transactions:${userId}`, []);
+  const [budget, setBudget] = useLocalStorage(`budget:${userId}`, 0);
 
   function addTransaction(data) {
     setTransactions([...transactions, { id: Date.now(), ...data }]);

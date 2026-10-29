@@ -5,7 +5,6 @@ import StatBox from "../components/StatBox";
 import ProgressBar from "../components/ProgressBar";
 import BudgetAlert from "../components/BudgetAlert";
 import TransactionRow from "../components/TransactionRow";
-import CurrencyCard from "../components/CurrencyCard";
 import useTransactions from "../hooks/useTransactions";
 import { formatMoney } from "../utils/formatMoney";
 import { currentMonth } from "../utils/formatDate";
@@ -79,9 +78,6 @@ function Dashboard() {
         <StatBox label="Income this month" value={formatMoney(monthIncome)} tone="income" />
         <StatBox label="Expenses this month" value={formatMoney(monthExpense)} tone="expense" />
       </div>
-
-      {/* Live exchange rates (Frankfurter API) */}
-      <CurrencyCard balance={balance} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Monthly budget */}
