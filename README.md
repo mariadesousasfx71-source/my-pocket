@@ -2,22 +2,26 @@
 
 **Every rupee, in one place.**
 
-My Pocket is a personal finance app built with React. Record your income and expenses, sort them into categories, search and filter them, see reports by category, set a monthly budget with a warning when you get close, and check your balance in US dollars and euros at today's rates. Everything is saved in your browser, so your data is still there when you come back.
+My Pocket is a personal finance app built with React. Record your income and expenses, sort them into categories, search and filter them, see reports by category, set a monthly budget with a warning when you get close, and check your balance in US dollars and euros at today's rates. Everything is saved in your browser, so your data is still there when you come back. Each person who logs in sees only their own records.
 
-Built for **Milestone 3: React – Modern UI Development**, **Option A: Expense Manager**.
+Built for **Milestone 3: React – Modern UI Development - Expense Manager**.
 
-🔗 **Live site:** _add your Vercel link here_
+🔗 **Live site:** https://my-pocket-gilt.vercel.app
 
 ---
 
 ## Features
 
-- **Login:** a simple name-only login. Every page is protected, and you're sent to the login page if you're not signed in
+- **Login:** a simple name-only login. Every page is protected, and you're sent to the login page if you're not signed in. You start logged out every time you open the app (a refresh keeps you in; closing the tab logs you out)
+- **Separate data for each person:** transactions and budget are saved under the logged-in name, so another name sees an empty account
 - **Dashboard:** balance, this month's income and expenses, a monthly budget bar, the latest transactions, and a budget warning at 80%
 - **Live currency conversion:** see your balance in USD and EUR using the free [Frankfurter API](https://frankfurter.dev), with a loading skeleton and an error message with "Try again"
 - **Transactions:** add, edit and delete income or expenses with amount, category, title, date and an optional note
-- **Search** by title or note, with a drop-down of your titles
-- **Filter** by type, category and month, and **sort** by date or amount
+- **Filters:** show expenses, income or both, pick a month, and order by newest or oldest. "More filters" adds search by title or note, a category filter and sort by amount
+- **Confirm before delete:** a pop-up asks "Delete this transaction?" before anything is removed
+- **Balance check:** an expense bigger than your available balance is refused with a pop-up
+- **Zero Balance message** on the Dashboard when income and expenses are equal
+- **Budget warning on the forms:** the Add and Edit forms warn you at 80% of the monthly budget before you save
 - **Reports:** income, expenses and savings for any month, plus category breakdowns with bars and percentages
 - **Settings:** set or remove a monthly budget
 - **Calendar picker** for dates, shown as DD-MM-YYYY, and amounts in rupees with Indian formatting (₹1,50,000)
@@ -67,8 +71,9 @@ main.jsx
                             ├── Transactions
                             │   ├── FilterBar     (filters lifted up into Transactions)
                             │   ├── TransactionRow
+                            │   ├── Modal         (confirm before delete)
                             │   └── EmptyState
-                            ├── AddTransaction ── TransactionForm ── Card
+                            ├── AddTransaction ── TransactionForm ── Card, BudgetAlert, Modal
                             ├── EditTransaction ── TransactionForm / EmptyState
                             ├── Reports ── StatBox ×3, Breakdown ×2 ── ProgressBar
                             ├── Settings ── Card, ProgressBar, BudgetAlert
@@ -80,14 +85,15 @@ main.jsx
 | State | Where | Why |
 |---|---|---|
 | Logged-in user | `AuthContext` | The Navbar, Login page and ProtectedRoute all need it |
-| Transactions and budget | `TransactionsContext` | Almost every page reads or changes them |
+| Transactions and budget | `TransactionsContext` | Almost every page reads or changes them. They are saved per person (`transactions:<name>`, `budget:<name>`) |
 | Filters (search, type, category, month, sort) | `Transactions` page, passed to `FilterBar` | Only this page uses them. This is **lifting state up**: the child shows the filters, the parent owns them |
 | Form fields | `TransactionForm` | Only the form needs them until you press Save |
+| Delete confirmation | `Transactions` page | Only this page knows which transaction is waiting to be deleted |
 | Exchange rates | `useExchangeRates` hook inside `CurrencyCard` | Only fetched when asked for, and only used there |
 
 ### Custom hooks
 
-- **`useLocalStorage(key, startValue)`:** like `useState`, but also saves to localStorage
+- **`useLocalStorage(key, startValue)`:** like `useState`, but also saves to localStorage (the key includes the person's name)
 - **`useTransactions()`:** reads the transactions Context
 - **`useAuth()`:** reads the login Context
 - **`useExchangeRates(enabled)`:** fetches live rates with `useEffect`, returning `{ rates, loading, error, retry }`. It cancels the request with an `AbortController` if the component goes away
@@ -115,13 +121,13 @@ No state libraries (Redux, Zustand) and no component libraries are used: every c
 ```
 src/
 ├── components/   Card, StatBox, ProgressBar, EmptyState, BudgetAlert, Skeleton,
-│                 TransactionRow, TransactionForm, FilterBar, CurrencyCard,
+│                 TransactionRow, TransactionForm, FilterBar, CurrencyCard, Modal,
 │                 Navbar, Layout, ProtectedRoute, Logo, LogoBadge, CoinsAnimation
 ├── context/      AuthContext, AuthProvider, TransactionsContext, TransactionsProvider
 ├── hooks/        useLocalStorage, useTransactions, useAuth, useExchangeRates
 ├── pages/        Login, Dashboard, Transactions, AddTransaction, EditTransaction,
 │                 Reports, Settings, NotFound
-├── utils/        categories, formatDate, formatMoney, styles
+├── utils/        budget, categories, formatDate, formatMoney, styles
 ├── App.jsx       routes
 ├── main.jsx      starts the app inside the router and both Context providers
 └── index.css     Tailwind, brand font and the 404 animation
@@ -162,4 +168,4 @@ Then open the address shown in the terminal (usually `http://localhost:5173`) an
 
 ## Author
 
-**Maria de Sousa**, web development student at WsCube Tech.
+**Maria de Sousa**, Full Stack Development student at WsCube Tech.
