@@ -2,9 +2,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import TransactionForm from "../components/TransactionForm";
 import EmptyState from "../components/EmptyState";
 import useTransactions from "../hooks/useTransactions";
+import { spentThisMonth } from "../utils/budget";
 
 function EditTransaction() {
-  const { transactions, updateTransaction } = useTransactions();
+  const { transactions, updateTransaction, budget } = useTransactions();
   const { id } = useParams(); // the id from the address, e.g. /edit/1729761540000
   const navigate = useNavigate();
 
@@ -32,6 +33,8 @@ function EditTransaction() {
       heading="Edit Transaction"
       buttonLabel="Save Changes"
       onSubmit={handleSave}
+      budget={budget}
+      spentSoFar={spentThisMonth(transactions, transaction.id)}
     />
   );
 }
